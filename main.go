@@ -3,8 +3,8 @@ package main
 import (
 	"html/template"
 	"io"
-	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -44,11 +44,11 @@ func main() {
 
 	e.GET("/", handleIndex)
 	e.POST("/todos", handleCreateTodo)
+	e.PUT("/todos/:id", handleToggleTodo)
+	e.DELETE("/todos/:id", handleDeleteTodo)
 
 	e.Logger.Fatal(e.Start(":1323"))
 	// e.GET("/todos/:id", handleEditTodo)
-	// e.PUT("/todos/:id", handleToggleTodo)
-	// e.DELETE("/todos/:id", handleDeleteTodo)
 
 	// e.Logger.Fatal(e.Start(":5001"))
 }
@@ -73,30 +73,16 @@ func handleCreateTodo(c echo.Context) error {
 	return c.Render(http.StatusCreated, "todo-item", todos)
 }
 
-// func handleEditTodo(c echo.Context) error {
-// 	id, err := strconv.Atoi(c.Param("id"))
-//
-// 	if err != nil {
-// 		log.Fatal("unable to convert string to int")
-// 	}
-//
-// 	var selectedTodo Todo
-// 	for _, todo := range todos {
-// 		if todo.ID == id {
-// 			selectedTodo = todo
-// 			break
-// 		}
-// 	}
-//
-// 	return Render(c, "edit.html", selectedTodo)
-// }
+func handleToggleTodo(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
 
-// func handleUpdateTodo(c echo.Context) error {
-//     id, err := strconv.Atoi(c.Param("id"))
-//
-//     if err != nil {
-//         log.Fatal("unable to convert string to int")
-//     }
-//
-//
-// }
+	for i, todo := range todos {
+		if todo.ID == id {
+			todos[i].IsDone = !todos[i].IsDone
+
+			return c.Render(http.StatusOK, "todo-item", todos)
+		}
+	}
+
+	return c.NoContent(http.StatusNotFound)
+}
