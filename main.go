@@ -48,9 +48,6 @@ func main() {
 	e.DELETE("/todos/:id", handleDeleteTodo)
 
 	e.Logger.Fatal(e.Start(":1323"))
-	// e.GET("/todos/:id", handleEditTodo)
-
-	// e.Logger.Fatal(e.Start(":5001"))
 }
 
 func handleIndex(c echo.Context) error {
@@ -79,6 +76,20 @@ func handleToggleTodo(c echo.Context) error {
 	for i, todo := range todos {
 		if todo.ID == id {
 			todos[i].IsDone = !todos[i].IsDone
+
+			return c.Render(http.StatusOK, "todo-item", todos)
+		}
+	}
+
+	return c.NoContent(http.StatusNotFound)
+}
+
+func handleDeleteTodo(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	for i, todo := range todos {
+		if todo.ID == id {
+			todos = append(todos[:i], todos[i+1:]...)
 
 			return c.Render(http.StatusOK, "todo-item", todos)
 		}
