@@ -1,0 +1,12 @@
+{{define "todo-item"}}
+<li id="todo-{{.ID}}">
+    <input type="checkbox" {{if .IsDone}}checked{{end}}
+           hx-put="/todos/{{.ID}}"
+           hx-target="#todo-{{.ID}}"
+           hx-swap="outerHTML">
+    <span>{{.Task}}</span>
+    <button hx-delete="/todos/{{.ID}}"
+            hx-target="#todo-{{.ID}}"
+            hx-swap="outerHTML">Delete</button>
+</li>
+{{end}}
