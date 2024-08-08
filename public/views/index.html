@@ -8,18 +8,28 @@
     <script src="https://unpkg.com/htmx.org@2.0.1" 
         integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" 
         crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Todo List</h1>
-    <form hx-post="/todos" hx-target="#todo-list" hx-swap="beforeend">
-        <input type="text" name="task" placeholder="Enter a new task" required>
-        <button type="submit">Add Todo</button>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">    
+    <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Todo List</h1>
+    <form hx-post="/todos" hx-target="#todo-list" hx-swap="beforeend" class="mb-6">
+        <input type="text" 
+                    name="task" 
+                    placeholder="Enter a new task" 
+                    class="flex-grow px-4 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+        <button type="submit" 
+                    class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Add Todo
+        </button>
     </form>
-    <ul id="todo-list"> 
+    <ul id="todo-list" class="space-y-2"> 
         {{range .}}
             {{template "todo-item" .}}
         {{end}}
     </ul>
+    </div>
 </body>
 </html>
 {{end}}
