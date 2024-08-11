@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"todo-echo/config"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -29,6 +30,8 @@ var todos []Todo
 var idCounter int
 
 func main() {
+	config.InitDatabase()
+
 	e := echo.New()
 
 	renderer := &Template{
