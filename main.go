@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"io"
 	"log"
 	"os"
+	"todo-echo/internals/model"
 	"todo-echo/internals/routes"
 
 	"github.com/joho/godotenv"
@@ -28,6 +28,8 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	model.LoadDB()
+
 	e := echo.New()
 
 	renderer := &Template{
@@ -44,8 +46,6 @@ func main() {
 	routes.SetupRoutes(e)
 
 	port := os.Getenv("APP_PORT")
-
-	fmt.Printf("port: %s\n", port)
 
 	if port == "" {
 		port = "8080"

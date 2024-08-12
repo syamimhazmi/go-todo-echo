@@ -1,8 +1,7 @@
-package models
+package model
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"todo-echo/internals/database"
@@ -13,15 +12,13 @@ import (
 var db *sql.DB
 
 type Todo struct {
-	ID   int    `json:"id"`
-	Task string `json:"task"`
-	Done bool   `json:"done"`
+	ID   int    `json:"id" query:"id"`
+	Task string `json:"task" query:"task"`
+	Done bool   `json:"done" query:"done"`
 }
 
-func init() {
+func LoadDB() {
 	var err error
-
-	fmt.Printf("database url: %s\n, app port: %s\n", os.Getenv("DATABASE_URL"), os.Getenv("APP_PORT"))
 
 	db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 
@@ -29,13 +26,13 @@ func init() {
 		log.Fatal(err)
 	}
 
-	defer db.Close()
-
-	err = db.Ping()
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	// defer db.Close()
+	//
+	// err = db.Ping()
+	//
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	database.MigrateTables(db)
 }
@@ -67,7 +64,7 @@ func GetTodos() ([]Todo, error) {
 }
 
 func AddTodo(todo *Todo) error {
-	err := db.QueryRow("insert into todos(title, done) values ($1, $1) returning id", todo.Task, todo.Done).Scan(&todo.ID)
+	err := db.QueryRow("insert into todos(task, done) values ($1, $2) returning id", todo.Task, todo.Done).Scan(&todo.ID)
 
 	return err
 }

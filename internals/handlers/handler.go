@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	models "todo-echo/internals/model"
@@ -15,7 +16,7 @@ func GetTodos(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, todos)
+	return c.Render(http.StatusOK, "index", todos)
 }
 
 func CreateTodo(c echo.Context) error {
@@ -24,6 +25,8 @@ func CreateTodo(c echo.Context) error {
 	if err := c.Bind(todo); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
+
+	todo.Task = c.FormValue("task")
 
 	err := models.AddTodo(todo)
 
