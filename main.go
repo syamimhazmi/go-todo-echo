@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io"
-	"net/http"
-	"strconv"
-	"todo-echo/config"
+	"log"
+	"os"
+	"todo-echo/internals/routes"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -19,18 +21,12 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-type Todo struct {
-	ID     int    `json:"id"`
-	Task   string `json:"task"`
-	IsDone bool   `json:"is_done"`
-}
-
-var todos []Todo
-
-var idCounter int
-
 func main() {
-	config.InitDatabase()
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	e := echo.New()
 
@@ -45,58 +41,15 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/", handleIndex)
-	e.POST("/todos", handleCreateTodo)
-	e.PUT("/todos/:id", handleToggleTodo)
-	e.DELETE("/todos/:id", handleDeleteTodo)
+	routes.SetupRoutes(e)
 
-	e.Logger.Fatal(e.Start(":1323"))
-}
+	port := os.Getenv("APP_PORT")
 
-func handleIndex(c echo.Context) error {
-	return c.Render(http.StatusOK, "index", todos)
-}
+	fmt.Printf("port: %s\n", port)
 
-func handleCreateTodo(c echo.Context) error {
-	task := c.FormValue("task")
-
-	idCounter++
-
-	todo := Todo{
-		ID:     idCounter,
-		Task:   task,
-		IsDone: false,
+	if port == "" {
+		port = "8080"
 	}
 
-	todos = append(todos, todo)
-
-	return c.Render(http.StatusCreated, "todo-item", todos)
-}
-
-func handleToggleTodo(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
-
-	for i, todo := range todos {
-		if todo.ID == id {
-			todos[i].IsDone = !todos[i].IsDone
-
-			return c.Render(http.StatusOK, "todo-item", todos)
-		}
-	}
-
-	return c.NoContent(http.StatusNotFound)
-}
-
-func handleDeleteTodo(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
-
-	for i, todo := range todos {
-		if todo.ID == id {
-			todos = append(todos[:i], todos[i+1:]...)
-
-			return c.Render(http.StatusOK, "todo-item", todos)
-		}
-	}
-
-	return c.NoContent(http.StatusNotFound)
+	e.Logger.Fatal(e.Start(":" + port))
 }
