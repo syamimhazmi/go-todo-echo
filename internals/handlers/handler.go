@@ -85,15 +85,25 @@ func UpdateTodo(c echo.Context) error {
 	todo.ID = id
 	todo.Task = c.FormValue("task")
 
-	fmt.Printf("%v\n", todo)
-
 	err = models.UpdateTodo(todo)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, todo)
+	return c.HTML(http.StatusOK, fmt.Sprintf(`
+        <li id="todo-%d" class="flex items-center justify-between p-2 border-b">
+          <span class="cursor-pointer" 
+                hx-get="/todos/%d/edit" 
+                hx-trigger="click" 
+                hx-target="this" 
+                hx-swap="outerHTML">%s</span>
+          <input type="hidden" name="done" value="%v">
+          <button hx-delete="/todos/%d" 
+                  hx-target="#todo-%d" 
+                  class="p-2 bg-red-500 text-white rounded">Delete</button>
+        </li>
+    `, id, id, todo.Task, todo.Done, id, id))
 }
 
 func DeleteTodo(c echo.Context) error {

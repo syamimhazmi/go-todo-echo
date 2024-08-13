@@ -39,7 +39,7 @@ func LoadDB() {
 }
 
 func GetTodos() ([]Todo, error) {
-	rows, err := db.Query("select id, task, done from todos")
+	rows, err := db.Query("select id, task, done from todos order by id desc")
 
 	if err != nil {
 		return nil, err
@@ -73,6 +73,7 @@ func GetTodoById(id int) (*Todo, error) {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("todo with id %d not found", id)
 		}
+
 		return nil, err
 	}
 
@@ -86,7 +87,9 @@ func AddTodo(todo *Todo) error {
 }
 
 func UpdateTodo(todo *Todo) error {
-	_, err := db.Exec("update todos set task = $1, done = $2 where id = $3", todo.Task, todo.Done, todo.ID)
+	err := db.QueryRow(
+		`update todos set task = $1, done = $2 where id = $3 returning id, task, done`,
+		todo.Task, todo.Done, todo.ID).Scan(&todo.ID, &todo.Task, &todo.Done)
 
 	return err
 }
