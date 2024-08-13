@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"todo-echo/internals/database"
@@ -61,6 +62,21 @@ func GetTodos() ([]Todo, error) {
 	}
 
 	return todos, nil
+}
+
+func GetTodoById(id int) (*Todo, error) {
+	var todo Todo
+
+	err := db.QueryRow("select id, task, done from todos where id = $1", id).Scan(&todo.ID, &todo.Task, &todo.Done)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("todo with id %d not found", id)
+		}
+		return nil, err
+	}
+
+	return &todo, nil
 }
 
 func AddTodo(todo *Todo) error {

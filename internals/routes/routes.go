@@ -11,6 +11,8 @@ func SetupRoutes(e *echo.Echo) {
 
 	e.POST("/todos", handlers.CreateTodo)
 
+	e.PUT("/todos/:id/edit", handlers.EditTodo)
+
 	e.PUT("/todos/:id", handlers.UpdateTodo)
 
 	e.DELETE("/todos/:id", handlers.DeleteTodo)

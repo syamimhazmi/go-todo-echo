@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"todo-echo/internals/model"
 	models "todo-echo/internals/model"
 
 	"github.com/labstack/echo/v4"
@@ -34,7 +35,38 @@ func CreateTodo(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusCreated, todo)
+	todos, err := models.GetTodos()
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.Render(http.StatusCreated, "todo-item", todos)
+}
+
+func EditTodo(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	todo, err := model.GetTodoById(id)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	return c.HTML(http.StatusOK, fmt.Sprintf(`
+		<input type="text" 
+			   class="p-2 border rounded"
+               name="task" 
+               value="%s" 
+               hx-put="/todos/%d" 
+               hx-trigger="blur" 
+               hx-target="#todo-%d" 
+               hx-swap="outerHTML">
+		`, todo.Task, id, id))
 }
 
 func UpdateTodo(c echo.Context) error {
@@ -51,6 +83,9 @@ func UpdateTodo(c echo.Context) error {
 	}
 
 	todo.ID = id
+	todo.Task = c.FormValue("task")
+
+	fmt.Printf("%v\n", todo)
 
 	err = models.UpdateTodo(todo)
 
