@@ -119,5 +119,11 @@ func DeleteTodo(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.NoContent(http.StatusNoContent)
+	todos, err := model.GetTodos()
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.Render(http.StatusOK, "todo-item", todos)
 }

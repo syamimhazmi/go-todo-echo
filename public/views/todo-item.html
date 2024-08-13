@@ -13,7 +13,7 @@
         <input type="hidden" name="done" value="{{.Done}}">
 
         <button hx-delete="/todos/{{.ID}}" 
-            hx-target="#todo-{{.ID}}" 
+            hx-target="#todos" 
             class="p-2 bg-red-500 text-white rounded"
         >
             Delete
